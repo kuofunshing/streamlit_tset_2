@@ -221,7 +221,7 @@ def gpt_page():
     user_input = st.text_input("你：", key="input")
 
     # 當用戶輸入新消息時，將其添加到聊天歷史記錄中並獲取模型的響應
-    if st.button("提交") and user_input:
+    if user_input:
         st.session_state['chat_history'].append({"role": "user", "content": user_input})
         try:
             chat_completion = client.chat.completions.create(
@@ -233,15 +233,11 @@ def gpt_page():
             st.session_state['remaining_uses'] -= 1  # 每次對話成功後減少一次剩餘服務次數
         except Exception as e:
             st.error(f"發生錯誤：{str(e)}")
-        
-        # 清空輸入框
-        st.session_state['input'] = ""
 
     # 顯示聊天歷史記錄
     for message in st.session_state['chat_history']:
         role = "你" if message["role"] == "user" else "ChatGPT"
         st.write(f"{role}: {message['content']}")
-
 
 # 調用主函數顯示頁面
 if __name__ == "__main__":
