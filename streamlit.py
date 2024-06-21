@@ -10,7 +10,9 @@ if not api_key:
     raise ValueError("Please set the OPENAI_API_KEY environment variable.")
 
 # 初始化 OpenAI 客户端
-openai.api_key = api_key
+client = OpenAI(api_key=api_key)
+
+
 
 # App title
 st.set_page_config(page_title="GPT Chatbot")
@@ -206,44 +208,36 @@ def yt_page():
 
 # GPT页面
 def gpt_page():
-    st.title("GPT Chatbot")
+    st.title("ChatGPT 对话功能")
     st.write("与 ChatGPT 进行对话。")
-
-    if 'remaining_uses' not in st.session_state:
-        st.session_state['remaining_uses'] = 10  # 假设初始有10次使用次数
 
     if st.session_state['remaining_uses'] <= 0:
         st.warning("剩余服务次数不足，请充值。")
         return
 
     # 初始化聊天历史记录
-    if 'chat_history' not in st.session_state:
-        st.session_state['chat_history'] = []
+if 'chat_history' not in st.session_state:
+    st.session_state['chat_history'] = []
 
-    # 获取用户输入
-    user_input = st.text_input("你：", key="input")
+# 获取用户输入
+user_input = st.text_input("你：", key="input")
 
-    # 当用户输入新消息时，向OpenAI API发送请求
-    if st.button("发送") and user_input:
-        # 每次发送消息后减少一次剩余服务次数
-        st.session_state['remaining_uses'] -= 1
-
-        # 向OpenAI API发送请求
-        st.session_state['chat_history'].append(f"你：{user_input}")
-        response = client.chat.completions.create(
-            engine="text-davinci-003",
-            prompt="\n".join(st.session_state['chat_history']) + "\nChatGPT:",
-            max_tokens=150,
-            n=1,
-            stop=None,
-            temperature=0.7,
+# 当用户输入新消息时，将其添加到聊天历史记录中并获取模型的响应
+if user_input:
+    st.session_state['chat_history'].append({"role": "user", "content": user_input})
+    try:
+        chat_completion = client.chat.completions.create(
+            messages=st.session_state['chat_history'],
+            model="gpt-3.5-turbo",
         )
-        response_text = response.choices[0].text.strip()
-        st.session_state['chat_history'].append(f"ChatGPT：{response_text}")
+        assistant_message = chat_completion.choices[0].message.content
+        st.session_state['chat_history'].append({"role": "assistant", "content": assistant_message})
+    except Exception as e:
+        st.error(f"An error occurred: {str(e)}")
 
-        # 显示聊天记录
-        for message in st.session_state['chat_history']:
-            st.write(message)
-
+# 显示聊天历史记录
+for message in st.session_state['chat_history']:
+    role = "你" if message["role"] == "user" else "ChatGPT"
+    st.write(f"{role}: {message['content']}")
 if __name__ == "__main__":
     main()
