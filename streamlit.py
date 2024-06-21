@@ -230,7 +230,7 @@ def gpt_page():
 
         # 向OpenAI API发送请求
         st.session_state['chat_history'].append(f"你：{user_input}")
-        response = openai.Completion.create(
+        response = client.chat.completions.create(
             engine="text-davinci-003",
             prompt="\n".join(st.session_state['chat_history']) + "\nChatGPT:",
             max_tokens=150,
