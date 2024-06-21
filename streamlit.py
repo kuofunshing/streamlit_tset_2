@@ -263,6 +263,18 @@ def gpt_page():
     else:
         st.write("請上傳一個圖片文件。")
 
+def recommend_videos_based_on_image(image):
+    # 模擬根據圖片推薦影片的功能，這裡可以實現更複雜的圖片分析和影片推薦邏輯
+    videos = [
+        {"title": "影片 1", "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"},
+        {"title": "影片 2", "url": "https://www.youtube.com/watch?v=tJuJ0Dls1hI"},
+        {"title": "影片 3", "url": "https://www.youtube.com/watch?v=shRV-LIbsO8"}
+    ]
+    return videos
+
+    else:
+        st.write("請上傳一個圖片文件。")
+
 
 
 
