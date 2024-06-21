@@ -205,7 +205,6 @@ def yt_page():
         st.video(video_options[selected_video])
 
 # GPT頁面
-# GPT頁面
 def gpt_page():
     st.title("GPT Chatbot")
     st.write("與 ChatGPT 進行對話。")
@@ -254,8 +253,25 @@ def gpt_page():
         # 每次上傳成功後減少一次剩餘服務次數
         st.session_state['remaining_uses'] -= 1
         st.write(f"剩餘次數: {st.session_state['remaining_uses']}")
+
+        # 根據上傳的圖片推薦 YouTube 影片
+        recommended_videos = recommend_videos_based_on_image(image)
+        st.write("根據您的圖片，推薦以下 YouTube 影片：")
+        for video in recommended_videos:
+            st.write(f"- [{video['title']}]({video['url']})")
+
     else:
         st.write("請上傳一個圖片文件。")
+
+def recommend_videos_based_on_image(image):
+    # 模擬根據圖片推薦影片的功能，這裡可以實現更複雜的圖片分析和影片推薦邏輯
+    videos = [
+        {"title": "影片 1", "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"},
+        {"title": "影片 2", "url": "https://www.youtube.com/watch?v=tJuJ0Dls1hI"},
+        {"title": "影片 3", "url": "https://www.youtube.com/watch?v=shRV-LIbsO8"}
+    ]
+    return videos
+
 
 # 調用主函數顯示頁面
 if __name__ == "__main__":
