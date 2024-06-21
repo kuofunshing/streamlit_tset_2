@@ -1,6 +1,6 @@
 import streamlit as st
 import sqlite3
-from PIL import Image
+from PIL import Image, ImageFilter, ImageEnhance, ImageOps
 import os
 from openai import OpenAI
 
@@ -174,7 +174,7 @@ def recharge_page():
         else:
             st.error("請填寫所有必填欄位，並確保CVV為3位數字。")
 
-# YouTube頁面
+# yt頁面
 def yt_page():
     st.header("yt頁面")
     st.write("這是yt頁面。")
@@ -272,14 +272,5 @@ def recommend_videos_based_on_image(image):
     ]
     return videos
 
-    else:
-        st.write("請上傳一個圖片文件。")
-
-
-
-
-
-
-# 調用主函數顯示頁面
 if __name__ == "__main__":
     main()
