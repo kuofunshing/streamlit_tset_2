@@ -205,6 +205,7 @@ def yt_page():
         st.video(video_options[selected_video])
 
 # GPT頁面
+# GPT頁面
 def gpt_page():
     st.title("GPT Chatbot")
     st.write("與 ChatGPT 進行對話。")
@@ -233,11 +234,28 @@ def gpt_page():
             st.session_state['remaining_uses'] -= 1  # 每次對話成功後減少一次剩餘服務次數
         except Exception as e:
             st.error(f"發生錯誤：{str(e)}")
+        
+        # 清空輸入框
+        st.session_state['input'] = ""
 
     # 顯示聊天歷史記錄
     for message in st.session_state['chat_history']:
         role = "你" if message["role"] == "user" else "ChatGPT"
         st.write(f"{role}: {message['content']}")
+
+    # 文件上傳
+    uploaded_file = st.file_uploader("選擇一個圖片文件", type=["jpg", "jpeg", "png"])
+
+    if uploaded_file is not None:
+        # 打開並顯示圖片
+        image = Image.open(uploaded_file)
+        st.image(image, caption='上傳的圖片', use_column_width=True)
+        
+        # 每次上傳成功後減少一次剩餘服務次數
+        st.session_state['remaining_uses'] -= 1
+        st.write(f"剩餘次數: {st.session_state['remaining_uses']}")
+    else:
+        st.write("請上傳一個圖片文件。")
 
 # 調用主函數顯示頁面
 if __name__ == "__main__":
