@@ -209,6 +209,9 @@ def gpt_page():
     st.title("GPT Chatbot")
     st.write("與 ChatGPT 進行對話。")
 
+    if 'remaining_uses' not in st.session_state:
+        st.session_state['remaining_uses'] = 10  # 假設初始有10次使用次數
+
     if st.session_state['remaining_uses'] <= 0:
         st.warning("剩餘服務次數不足，請充值。")
         return
@@ -224,11 +227,11 @@ def gpt_page():
     if user_input:
         st.session_state['chat_history'].append({"role": "user", "content": user_input})
         try:
-            chat_completion = client.chat.completions.create(
-                messages=st.session_state['chat_history'],
+            chat_completion = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
+                messages=st.session_state['chat_history']
             )
-            assistant_message = chat_completion.choices[0].message.content
+            assistant_message = chat_completion.choices[0].message["content"]
             st.session_state['chat_history'].append({"role": "assistant", "content": assistant_message})
             st.session_state['remaining_uses'] -= 1  # 每次對話成功後減少一次剩餘服務次數
         except Exception as e:
@@ -242,6 +245,14 @@ def gpt_page():
         role = "你" if message["role"] == "user" else "ChatGPT"
         st.write(f"{role}: {message['content']}")
 
+### 图片页面代码
+import streamlit as st
+from PIL import Image
+
+def image_page():
+    st.title("图片上传页面")
+    st.write("上传并显示图片。")
+
     # 文件上傳
     uploaded_file = st.file_uploader("選擇一個圖片文件", type=["jpg", "jpeg", "png"])
 
@@ -249,6 +260,9 @@ def gpt_page():
         # 打開並顯示圖片
         image = Image.open(uploaded_file)
         st.image(image, caption='上傳的圖片', use_column_width=True)
+        
+        # 将上传的图片保存到 session_state 中，以便在 GPT 页面中访问
+        st.session_state['uploaded_image'] = image
 
         # 按下確認按鈕後顯示推薦影片
         if st.button("確認"):
@@ -271,6 +285,17 @@ def recommend_videos_based_on_image(image):
         {"title": "影片 3", "url": "https://www.youtube.com/watch?v=shRV-LIbsO8"}
     ]
     return videos
+
+### 主程序代码
+def main():
+    st.sidebar.title("导航")
+    page = st.sidebar.selectbox("选择页面", ["GPT Chatbot", "图片上传页面"])
+
+    if page == "GPT Chatbot":
+        gpt_page()
+    elif page == "图片上传页面":
+        image_page()
+
 
 if __name__ == "__main__":
     main()
