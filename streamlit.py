@@ -3,10 +3,32 @@ import sqlite3
 from PIL import Image
 import os
 import openai
+import googleapiclient.discovery
 from openai import OpenAI
+from googleapiclient.discovery import build
 
 # 使用環境變數設置 OpenAI API 金鑰
-api_key = os.getenv("OPENAI_API_KEY")
+# 使用環境變數設置 OpenAI API 金鑰
+openai.api_key = st.secrets["OPENAI_API_KEY"]
+
+# 創建 YouTube API 客戶端
+def youtube_search(query, max_results=10):
+    youtube = build('youtube', 'v3', developerKey=st.secrets["YOUTUBE_API_KEY"])
+    search_response = youtube.search().list(
+        q=query,
+        part='id,snippet',
+        maxResults=max_results,
+        type='video'
+    ).execute()
+
+    results = []
+    for item in search_response.get('items', []):
+        video_title = item['snippet']['title']
+        video_id = item['id']['videoId']
+        video_url = f"https://www.youtube.com/watch?v={video_id}"
+        results.append((video_title, video_url))
+
+    return results
 if not api_key:
     raise ValueError("Please set the OPENAI_API_KEY environment variable.")
 
@@ -228,6 +250,7 @@ def yt_page():
         st.session_state['remaining_uses'] -= 1
         st.video(video_options[selected_video])
 
+
 # GPT頁面
 def gpt_page():
     st.title("ChatGPT 对话功能")
@@ -240,7 +263,6 @@ def gpt_page():
     # 获取用户输入
     user_input = st.text_input("你：", key="input")
 
-    # 当用户输入新消息时，将其添加到聊天历史记录中并获取模型的响应
     if user_input and st.button("发送"):
         st.session_state['chat_history'].append({"role": "user", "content": user_input})
     
@@ -248,31 +270,29 @@ def gpt_page():
         system_message = "你是影片搜尋助手,以繁體中文回答,請根據提供的標籤推薦youtube影片,僅顯示標題和連結,不要用記錄呈現的文字回答"
         st.session_state['chat_history'].append({"role": "system", "content": system_message})
 
-        # 檢查剩餘服務次數是否足夠
         if st.session_state['remaining_uses'] >= 5:
             try:
                 chat_completion = client.chat.completions.create(
                     messages=st.session_state['chat_history'],
                     model="gpt-4o",
-                    max_tokens=200  # 设置最大token数为200
+                    max_tokens=200
                 )
-                assistant_message = chat_completion.choices[0].message.content
+                assistant_message = chat_completion.choices[0].message['content']
                 st.session_state['chat_history'].append({"role": "assistant", "content": assistant_message})
 
-                # 每次生成回應後減少5次剩餘服務次數
+                # 显示 YouTube 搜索结果
+                st.write("根据推荐关键词搜索 YouTube 影片:")
+                video_results = youtube_search(assistant_message)
+                for title, url in video_results:
+                    st.markdown(f"[{title}]({url})")
+
+                # 每次生成回应后减少5次剩余服务次数
                 st.session_state['remaining_uses'] -= 5
-                st.write(f"剩餘次數: {st.session_state['remaining_uses']}")
+                st.write(f"剩余次数: {st.session_state['remaining_uses']}")
 
             except Exception as e:
                 st.error(f"An error occurred: {str(e)}")
         else:
-            st.error("剩餘服務次數不足，请充值。")
-
-    # 显示聊天历史记录
-    for message in st.session_state['chat_history']:
-        role = "你" if message["role"] == "user" else "ChatGPT"
-        st.write(f"{role}: {message['content']}")
-
-
+            st.error("剩余服务次数不足，请充值。")
 if __name__ == "__main__":
     main()
