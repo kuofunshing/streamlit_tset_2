@@ -1,18 +1,19 @@
 import streamlit as st
-import sqlite3
-from PIL import Image
 import os
 import openai
 from openai import OpenAI
+from PIL import Image
+import sqlite3
 
-# 使用環境變數設置 OpenAI API 金鑰
+# 使用环境变量设置 OpenAI API 金钥
 api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
     raise ValueError("Please set the OPENAI_API_KEY environment variable.")
 
-# 初始化 OpenAI 客戶端
-openai.api_key = api_key
+# 初始化 OpenAI 客户端
 client = OpenAI(api_key=api_key)
+# 设置页面布局
+st.set_page_config(page_title="GPT Chatbot")
 
 # App 標題
 st.set_page_config(page_title="GPT Chatbot")
@@ -47,7 +48,7 @@ def main():
 
         # 顯示多頁面導航
         pages = {
-            "圖片處理": data_page,
+            "图片展示": image_display_page
             "YT頁面": yt_page,
             "充值頁面": recharge_page,
             "GPT Chatbot": gpt_page,
@@ -123,29 +124,22 @@ def create_user(username, password):
     conn.commit()
     conn.close()
 
-# 圖片處理頁面
-def data_page():
-    st.header("圖片")
-    st.write("這是圖片頁面。")
-  
-    if st.session_state['remaining_uses'] <= 0:
-        st.warning("剩餘服務次數不足，請充值。")
-        return
-
-    # 文件上傳
-    uploaded_file = st.file_uploader("選擇一個圖片文件", type=["jpg", "jpeg", "png"])
-
-    if uploaded_file is not None:
-        # 打開並顯示圖片
-        image = Image.open(uploaded_file)
-        st.image(image, caption='上傳的圖片', use_column_width=True)
-        
-        # 每次上傳成功後減少一次剩餘服務次數
-        st.session_state['remaining_uses'] -= 1
-        st.write(f"剩餘次數: {st.session_state['remaining_uses']}")
+def image_display_page():
+    st.title("图片展示")
+    options = ["Bus", "Car", "Cheetah", "Penguins", "Pig", "Scooter", "cat", "rabbit", "zebra"]
+    choice = st.selectbox("选择一个动物", options)
+    image_path = f'label/{choice}.jpg'
+    text_path = f'label/{choice}.txt'
+    if os.path.exists(image_path) and os.path.exists(text_path):
+        image = Image.open(image_path)
+        st.image(image, caption=f'显示的是: {choice}', use_column_width=True)
+        with open(text_path, 'r') as file:
+            text_content = file.read()
+        st.write(text_content)
     else:
-        st.write("請上傳一個圖片文件。")
+        st.error("文件不存在，请确保路径和文件名正确。")
 
+# Remaining functions like login, signup, validate_login, etc., go here.
 # 充值頁面
 def recharge_page():
     st.header("充值頁面")
