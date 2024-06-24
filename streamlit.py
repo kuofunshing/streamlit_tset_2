@@ -130,31 +130,39 @@ def create_user(username, password):
 def image_processing():
     st.header("圖片")
     st.write("這是圖片頁面。")
-    options = ["Bus", "Car", "Cheetah", "Penguins", "Pig", "Scooter", "cat", "rabbit", "zebra"]
+    options = ["Bus", "Car", "Cheetah", "Penguins", "Pig", "Scooter", "Cat", "Rabbit", "Zebra"]
     animal = st.selectbox("選擇一個項目", options)
+    confirm = st.button("確認")  # 確認按鈕用於顯示圖片和文本
 
-    # Display image and text based on selection
-    if animal:
-        image_path = f'label/{animal}.jpg'
-        text_path = f'label/{animal}.txt'
+    if confirm:
+        # 檢查剩餘服務次數是否足夠
+        if st.session_state['remaining_uses'] > 0:
+            image_path = f'label/{animal}.jpg'
+            text_path = f'label/{animal}.txt'
 
-        if os.path.exists(image_path) and os.path.exists(text_path):
-            image = Image.open(image_path)
-            st.image(image, caption=f'顯示的是: {animal}', use_column_width=True)
+            if os.path.exists(image_path) and os.path.exists(text_path):
+                image = Image.open(image_path)
+                st.image(image, caption=f'顯示的是: {animal}', use_column_width=True)
 
-            with open(text_path, 'r') as file:
-                text_content = file.read()
-            st.write(text_content)
+                with open(text_path, 'r') as file:
+                    text_content = file.read()
+                st.write(text_content)
+
+                # 每次查看圖片成功後減少一次剩餘服務次數
+                st.session_state['remaining_uses'] -= 1
+                st.write(f"剩餘次數: {st.session_state['remaining_uses']}")
+
+            else:
+                st.error("文件不存在，請確保路徑和文件名正確。")
         else:
-            st.error("文件不存在，請確保路徑和文件名正確。")
+            st.error("剩餘服務次數不足，請充值。")
 
+    # 文件上傳部分保持不變
     uploaded_file = st.file_uploader("選擇一個圖片文件", type=["jpg", "jpeg", "png"])
-
     if uploaded_file is not None:
         image = Image.open(uploaded_file)
         st.image(image, caption='上傳的圖片', use_column_width=True)
-    else:
-        st.write("請上傳一個圖片文件。")
+
 
 # 充值頁面
 def recharge_page():
