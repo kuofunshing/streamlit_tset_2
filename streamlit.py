@@ -254,7 +254,7 @@ def gpt_page():
         st.session_state['chat_history'].append({"role": "system", "content": system_message})
 
         try:
-            chat_completion = openai.ChatCompletion.create(
+            chat_completion = client.chat.completions.create(
                 messages=st.session_state['chat_history'],
                 model="gpt-4o",
                 max_tokens=200
