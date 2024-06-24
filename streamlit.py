@@ -10,7 +10,11 @@ api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
     raise ValueError("Please set the OPENAI_API_KEY environment variable.")
 
+from googleapiclient.discovery import build
 
+def youtube_search(query, max_results=10):
+    # 使用你的 API 金鑰創建 YouTube API 客戶端
+    youtube = build('youtube', 'v3', developerKey='YOUR_API_KEY')
 
 
 # 初始化 OpenAI 客戶端
