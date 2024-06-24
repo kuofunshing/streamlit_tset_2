@@ -237,30 +237,38 @@ def gpt_page():
     user_input = st.text_input("你：", key="input")
 
     # 当用户输入新消息时，将其添加到聊天历史记录中并获取模型的响应
-    if user_input:
+    if user_input and st.button("发送"):
         st.session_state['chat_history'].append({"role": "user", "content": user_input})
     
         # 添加系统信息指导模型行为
         system_message = "你是影片搜尋助手,以繁體中文回答,請根據提供的標籤推薦youtube影片,僅顯示標題和連結,不要用記錄呈現的文字回答"
         st.session_state['chat_history'].append({"role": "system", "content": system_message})
 
-        try:
-            chat_completion = client.chat.completions.create(
-                messages=st.session_state['chat_history'],
-                model="gpt-4o",
-                max_tokens=200  # 设置最大token数为200
-            )
-            assistant_message = chat_completion.choices[0].message.content
-            st.session_state['chat_history'].append({"role": "assistant", "content": assistant_message})
-        except Exception as e:
-            st.error(f"An error occurred: {str(e)}")
+        # 檢查剩餘服務次數是否足夠
+        if st.session_state['remaining_uses'] >= 5:
+            try:
+                chat_completion = client.chat.completions.create(
+                    messages=st.session_state['chat_history'],
+                    model="gpt-4o",
+                    max_tokens=200  # 设置最大token数为200
+                )
+                assistant_message = chat_completion.choices[0].message.content
+                st.session_state['chat_history'].append({"role": "assistant", "content": assistant_message})
 
+                # 每次生成回應後減少5次剩餘服務次數
+                st.session_state['remaining_uses'] -= 5
+                st.write(f"剩餘次數: {st.session_state['remaining_uses']}")
 
+            except Exception as e:
+                st.error(f"An error occurred: {str(e)}")
+        else:
+            st.error("剩餘服務次數不足，请充值。")
 
     # 显示聊天历史记录
     for message in st.session_state['chat_history']:
         role = "你" if message["role"] == "user" else "ChatGPT"
         st.write(f"{role}: {message['content']}")
+
 
 if __name__ == "__main__":
     main()
