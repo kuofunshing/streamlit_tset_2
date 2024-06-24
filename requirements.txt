@@ -3,3 +3,4 @@ streamlit
 google.cloud
 google-cloud-vision
 Pillow
+google-api-python-client
