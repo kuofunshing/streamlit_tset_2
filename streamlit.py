@@ -4,30 +4,11 @@ from PIL import Image
 import os
 import openai
 from openai import OpenAI
-from googleapiclient.discovery import build
 
-
-# Initialize OpenAI and YouTube clients
-openai.api_key = st.secrets["OPENAI_API_KEY"]
-youtube = build('youtube', 'v3', developerKey=st.secrets["YOUTUBE_API_KEY"])
+# 使用環境變數設置 OpenAI API 金鑰
 api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
     raise ValueError("Please set the OPENAI_API_KEY environment variable.")
-def youtube_search(query, max_results=5):
-    search_response = youtube.search().list(
-        q=query,
-        part='id,snippet',
-        maxResults=max_results,
-        type='video'
-    ).execute()
-
-    results = []
-    for item in search_response.get('items', []):
-        video_title = item['snippet']['title']
-        video_id = item['id']['videoId']
-        video_url = f"https://www.youtube.com/watch?v={video_id}"
-        results.append(f"{video_title}: {video_url}")
-    return results
 
 
 
@@ -235,6 +216,7 @@ def yt_page():
         st.session_state['remaining_uses'] -= 1
         st.video(video_options[selected_video])
 
+# GPT頁面
 def gpt_page():
     st.title("ChatGPT 对话功能")
     st.write("与 ChatGPT 进行对话，获取基于标签的 YouTube 视频推荐。")
@@ -246,9 +228,10 @@ def gpt_page():
     # 获取用户输入
     user_input = st.text_input("你：", key="input")
 
-    if user_input and st.button("发送"):
+    # 当用户输入新消息时，将其添加到聊天历史记录中并获取模型的响应
+    if user_input:
         st.session_state['chat_history'].append({"role": "user", "content": user_input})
-        
+    
         # 添加系统信息指导模型行为
         system_message = "你是影片搜尋助手,以繁體中文回答,請根據提供的標籤推薦youtube影片,僅顯示標題和連結,不要用記錄呈現的文字回答"
         st.session_state['chat_history'].append({"role": "system", "content": system_message})
@@ -257,20 +240,14 @@ def gpt_page():
             chat_completion = client.chat.completions.create(
                 messages=st.session_state['chat_history'],
                 model="gpt-4o",
-                max_tokens=200
+                max_tokens=200  # 设置最大token数为200
             )
-            # Assuming the response structure has a `choices` list and we fetch the first `Choice` object, then access `message`
-            assistant_message = chat_completion.choices[0].message.content if chat_completion.choices else "No response generated."
+            assistant_message = chat_completion.choices[0].message.content
             st.session_state['chat_history'].append({"role": "assistant", "content": assistant_message})
-
-            # 使用 ChatGPT 的回應來搜尋 YouTube 影片
-            video_results = youtube_search(assistant_message)
-            st.write("YouTube 搜索結果:")
-            for result in video_results:
-                st.markdown(result)
-
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
+
+
 
     # 显示聊天历史记录
     for message in st.session_state['chat_history']:
