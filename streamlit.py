@@ -10,6 +10,9 @@ api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
     raise ValueError("Please set the OPENAI_API_KEY environment variable.")
 
+
+
+
 # 初始化 OpenAI 客戶端
 openai.api_key = api_key
 client = OpenAI(api_key=api_key)
@@ -47,7 +50,7 @@ def main():
 
         # 顯示多頁面導航
         pages = {
-            "圖片處理": data_page,
+            "圖片與提示詞": image_processing,
             "YT頁面": yt_page,
             "充值頁面": recharge_page,
             "GPT Chatbot": gpt_page,
@@ -123,26 +126,33 @@ def create_user(username, password):
     conn.commit()
     conn.close()
 
-# 圖片處理頁面
-def data_page():
+# 圖片頁面
+def image_processing():
     st.header("圖片")
     st.write("這是圖片頁面。")
-  
-    if st.session_state['remaining_uses'] <= 0:
-        st.warning("剩餘服務次數不足，請充值。")
-        return
+    options = ["Bus", "Car", "Cheetah", "Penguins", "Pig", "Scooter", "cat", "rabbit", "zebra"]
+    animal = st.selectbox("選擇一個項目", options)
 
-    # 文件上傳
+    # Display image and text based on selection
+    if animal:
+        image_path = f'label/{animal}.jpg'
+        text_path = f'label/{animal}.txt'
+
+        if os.path.exists(image_path) and os.path.exists(text_path):
+            image = Image.open(image_path)
+            st.image(image, caption=f'顯示的是: {animal}', use_column_width=True)
+
+            with open(text_path, 'r') as file:
+                text_content = file.read()
+            st.write(text_content)
+        else:
+            st.error("文件不存在，請確保路徑和文件名正確。")
+
     uploaded_file = st.file_uploader("選擇一個圖片文件", type=["jpg", "jpeg", "png"])
 
     if uploaded_file is not None:
-        # 打開並顯示圖片
         image = Image.open(uploaded_file)
         st.image(image, caption='上傳的圖片', use_column_width=True)
-        
-        # 每次上傳成功後減少一次剩餘服務次數
-        st.session_state['remaining_uses'] -= 1
-        st.write(f"剩餘次數: {st.session_state['remaining_uses']}")
     else:
         st.write("請上傳一個圖片文件。")
 
@@ -208,35 +218,38 @@ def yt_page():
 
 # GPT頁面
 def gpt_page():
-    st.title("ChatGPT 對話功能")
-    st.write("與 ChatGPT 進行對話。")
+    st.title("ChatGPT 对话功能")
+    st.write("与 ChatGPT 进行对话，获取基于标签的 YouTube 视频推荐。")
 
-    if st.session_state['remaining_uses'] <= 0:
-        st.warning("剩餘服務次數不足，請充值。")
-        return
-
-    # 初始化聊天歷史記錄
+    # 初始化聊天历史记录
     if 'chat_history' not in st.session_state:
         st.session_state['chat_history'] = []
 
-    # 獲取使用者輸入
+    # 获取用户输入
     user_input = st.text_input("你：", key="input")
 
-    # 當使用者輸入新消息時，將其添加到聊天歷史記錄中並獲取模型的回應
+    # 当用户输入新消息时，将其添加到聊天历史记录中并获取模型的响应
     if user_input:
         st.session_state['chat_history'].append({"role": "user", "content": user_input})
+    
+        # 添加系统信息指导模型行为
+        system_message = "你是影片搜尋助手,以繁體中文回答,請根據提供的標籤推薦youtube影片,僅顯示標題和連結,不要用記錄呈現的文字回答"
+        st.session_state['chat_history'].append({"role": "system", "content": system_message})
+
         try:
             chat_completion = client.chat.completions.create(
                 messages=st.session_state['chat_history'],
-                model="gpt-3.5-turbo",
+                model="gpt-4o",
+                max_tokens=200  # 设置最大token数为200
             )
             assistant_message = chat_completion.choices[0].message.content
             st.session_state['chat_history'].append({"role": "assistant", "content": assistant_message})
-            st.session_state['remaining_uses'] -= 1  # 每次請求減少一次服務次數
         except Exception as e:
-            st.error(f"發生錯誤： {str(e)}")
+            st.error(f"An error occurred: {str(e)}")
 
-    # 顯示聊天歷史記錄
+
+
+    # 显示聊天历史记录
     for message in st.session_state['chat_history']:
         role = "你" if message["role"] == "user" else "ChatGPT"
         st.write(f"{role}: {message['content']}")
