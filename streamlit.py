@@ -259,7 +259,8 @@ def gpt_page():
                 model="gpt-4o",
                 max_tokens=200
             )
-            assistant_message = chat_completion.choices[0].message['content']
+            # Assuming the response structure has a `choices` list and we fetch the first `Choice` object, then access `message`
+            assistant_message = chat_completion.choices[0].message.content if chat_completion.choices else "No response generated."
             st.session_state['chat_history'].append({"role": "assistant", "content": assistant_message})
 
             # 使用 ChatGPT 的回應來搜尋 YouTube 影片
