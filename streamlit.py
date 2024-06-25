@@ -190,8 +190,12 @@ def recharge_page():
 def yt_page():
     st.header("YT頁面")
     st.write("這是YT頁面。")
-
     st.title("顯示 YouTube 影片選項")
+
+    # 確保 'has_played' 和 'last_played_video' 在 session state 中初始化
+    if 'has_played' not in st.session_state:
+        st.session_state['has_played'] = False
+        st.session_state['last_played_video'] = None
 
     if st.session_state['remaining_uses'] <= 0:
         st.warning("剩餘服務次數不足，請充值。")
@@ -207,15 +211,21 @@ def yt_page():
         "影片 7": "https://www.youtube.com/watch?v=Yqr9OIgcrrA&pp=ygUPb25seSBteSByYWlsZ3Vu",
         "影片 8": "https://www.youtube.com/watch?v=FDd4jekq93A&ab_channel=VelikiyKutere",
         "影片 9": "https://www.youtube.com/watch?v=mdSXKdnLX9I&pp=ygUP57SF6JOu44Gu5byT55-i",
-       
     }
-    
+
     selected_video = st.selectbox("選擇一個影片", list(video_options.keys()))
 
+    # 判斷是否第一次播放此影片
     if st.button("播放"):
-        st.session_state['remaining_uses'] -= 1
+        if not st.session_state['has_played'] or st.session_state['last_played_video'] != selected_video:
+            st.session_state['remaining_uses'] -= 1
+            st.session_state['has_played'] = True
+            st.session_state['last_played_video'] = selected_video
+            st.success("播放次數扣除")
+        else:
+            st.success("已播放過此影片，不再扣次")
+        
         st.video(video_options[selected_video])
-
 # GPT頁面
 def gpt_page():
     st.title("GPT Chatbot-yt推薦")
