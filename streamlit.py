@@ -73,9 +73,9 @@ def main():
 
         # 顯示多頁面導航
         pages = {
+            "充值頁面": recharge_page,
             "圖片與提示詞": image_processing,
             "YT頁面": yt_page,
-            "充值頁面": recharge_page,
             "GPT Chatbot-yt推薦": gpt_page,
         }
     else:
