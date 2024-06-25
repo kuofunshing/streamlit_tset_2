@@ -196,33 +196,37 @@ def display_image_and_text(animal):
         st.write("请上传一个图片文件。")
 # 充值頁面
 def recharge_page():
-    st.header("充值頁面")
-    st.write("這是充值頁面。")
+    st.header("充值页面")
+    st.write("这是充值页面。")
     
-    card_number = st.text_input("卡號", type="password")
+    card_number = st.text_input("卡号", type="password", max_chars=16)
     
     months = [f"{i:02d}" for i in range(1, 13)]
     years = [f"{i:02d}" for i in range(0, 25)]
     
-    selected_month = st.selectbox("選擇月份", months)
-    selected_year = st.selectbox("選擇年份", years)
+    selected_month = st.selectbox("选择月份", months)
+    selected_year = st.selectbox("选择年份", years)
     
     month_year = f"{selected_month}/{selected_year}"
     
     cvv = st.text_input("CVV", max_chars=3)
-    amount_option = st.selectbox("選擇充值金額", ["10次,100元", "100次,9990元", "1000次,99900元"])
+    amount_option = st.selectbox("选择充值金额", ["10次,100元", "100次,9990元", "1000次,99900元"])
     
     if st.button("充值"):
-        if card_number and month_year and cvv.isdigit() and len(cvv) == 3 and amount_option:
+        # 检查卡号长度是否为16位
+        if len(card_number) == 16 and card_number.isdigit() and cvv.isdigit() and len(cvv) == 3 and amount_option:
             amount_map = {
                 "10次,100元": 10,
                 "100次,9990元": 100,
                 "1000次,99900元": 1000
             }
             st.session_state['remaining_uses'] += amount_map[amount_option]
-            st.success("充值成功！剩餘服務次數已增加。")
+            st.success("充值成功！剩余服务次数已增加。")
         else:
-            st.error("請填寫所有必填欄位，並確保 CVV 為3位數字。")
+            if len(card_number) != 16:
+                st.error("卡号必须是16位数字。")
+            else:
+                st.error("请填写所有必填字段，并确保CVV为3位数字。")
 
 def yt_page():
     st.header("YT頁面")
