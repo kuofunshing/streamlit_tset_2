@@ -290,7 +290,7 @@ def gpt_page():
         st.session_state['chat_history'].append({"role": "user", "content": user_input})
     
         # 添加系統信息指導模型行為
-        system_message = "你是影片搜尋助手,以繁體中文回答,請根據提供的標籤提供四組用於youtube搜尋的關鍵字"
+        system_message = "你是影片搜尋助手,以繁體中文回答,請根據提供的標籤提供四組用於youtube搜尋的關鍵字,請只回復關鍵字"
         st.session_state['chat_history'].append({"role": "system", "content": system_message})
 
         try:
