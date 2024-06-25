@@ -53,7 +53,7 @@ def main():
             "圖片與提示詞": image_processing,
             "YT頁面": yt_page,
             "充值頁面": recharge_page,
-            "GPT Chatbot": gpt_page,
+            "GPT Chatbot-yt推薦": gpt_page,
         }
     else:
         pages = {
@@ -218,8 +218,8 @@ def yt_page():
 
 # GPT頁面
 def gpt_page():
-    st.title("ChatGPT 对话功能")
-    st.write("与 ChatGPT 进行对话，获取基于标签的 YouTube 视频推荐。")
+    st.title("GPT Chatbot-yt推薦")
+    st.write("与 ChatGPT 进行对话，获取基于标签的YouTube關鍵字推荐。")
 
     # 初始化聊天历史记录
     if 'chat_history' not in st.session_state:
