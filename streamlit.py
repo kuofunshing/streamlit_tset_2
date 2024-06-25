@@ -149,36 +149,51 @@ def create_user(username, password):
     conn.commit()
     conn.close()
 
-# 圖片頁面
 def image_processing():
-    st.header("圖片")
-    st.write("這是圖片頁面。")
+    st.header("图片")
+    st.write("这是图片页面。")
     options = ["Bus", "Car", "Cheetah", "Penguins", "Pig", "Scooter", "cat", "rabbit", "zebra"]
-    animal = st.selectbox("選擇一個項目", options)
+    animal = st.selectbox("选择一个项目", options)
 
-    # Display image and text based on selection
-    if animal:
-        image_path = f'label/{animal}.jpg'
-        text_path = f'label/{animal}.txt'
+    # 初始化 session state，用于跟踪用户的选择和操作状态
+    if 'last_viewed_animal' not in st.session_state:
+        st.session_state['last_viewed_animal'] = None
 
-        if os.path.exists(image_path) and os.path.exists(text_path):
-            image = Image.open(image_path)
-            st.image(image, caption=f'顯示的是: {animal}', use_column_width=True)
+    confirm_button = st.button("确认")
 
-            with open(text_path, 'r') as file:
-                text_content = file.read()
-            st.write(text_content)
+    # 当用户点击确认按钮并且所选项目改变时，显示图片和文本
+    if confirm_button:
+        if animal != st.session_state['last_viewed_animal']:
+            st.session_state['last_viewed_animal'] = animal
+            # 扣除次数
+            st.session_state['remaining_uses'] -= 1
+            st.success("次数已扣除，您可以查看图片。")
+            display_image_and_text(animal)
         else:
-            st.error("文件不存在，請確保路徑和文件名正確。")
+            st.success("您已查看此图片，次数不再扣除。")
+            display_image_and_text(animal)
 
-    uploaded_file = st.file_uploader("選擇一個圖片文件", type=["jpg", "jpeg", "png"])
+def display_image_and_text(animal):
+    image_path = f'label/{animal}.jpg'
+    text_path = f'label/{animal}.txt'
+
+    if os.path.exists(image_path) and os.path.exists(text_path):
+        image = Image.open(image_path)
+        st.image(image, caption=f'显示的是: {animal}', use_column_width=True)
+
+        with open(text_path, 'r') as file:
+            text_content = file.read()
+        st.write(text_content)
+    else:
+        st.error("文件不存在，请确保路径和文件名正确。")
+
+    uploaded_file = st.file_uploader("选择一个图片文件", type=["jpg", "jpeg", "png"])
 
     if uploaded_file is not None:
         image = Image.open(uploaded_file)
-        st.image(image, caption='上傳的圖片', use_column_width=True)
+        st.image(image, caption='上传的图片', use_column_width=True)
     else:
-        st.write("請上傳一個圖片文件。")
-
+        st.write("请上传一个图片文件。")
 # 充值頁面
 def recharge_page():
     st.header("充值頁面")
