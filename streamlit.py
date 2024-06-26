@@ -262,6 +262,13 @@ def yt_page():
     }
 
     selected_video = st.selectbox("選擇一個影片", list(video_options.keys()))
+
+    # 初始化 session state 鍵
+    if 'has_played' not in st.session_state:
+        st.session_state['has_played'] = False
+    if 'last_played_video' not in st.session_state:
+        st.session_state['last_played_video'] = None
+
     if st.button("播放選定影片"):
         if not st.session_state['has_played'] or st.session_state['last_played_video'] != selected_video:
             st.session_state['remaining_uses'] -= 1
@@ -271,7 +278,6 @@ def yt_page():
         else:
             st.success("已播放過此影片，不再扣次")
         
-        st.video(video_options[selected_video])
 
 # GPT頁面
 def gpt_page():
