@@ -149,6 +149,7 @@ def create_user(username, password):
     conn.commit()
     conn.close()
 
+#圖片頁面
 def image_processing():
     st.header("圖片")
     st.write("這是圖片頁面。")
@@ -184,6 +185,23 @@ def display_image_and_text(animal):
         with open(text_path, 'r') as file:
             text_content = file.read()
         st.write(text_content)
+        
+        # 添加複製到剪貼簿按鈕
+        if st.button("複製文字到剪貼簿"):
+            st.components.v1.html(f"""
+                <script>
+                function copyToClipboard(text) {{
+                    const el = document.createElement('textarea');
+                    el.value = text;
+                    document.body.appendChild(el);
+                    el.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(el);
+                }}
+                copyToClipboard(`{text_content.replace('\n', '\\n').replace('"', '\\"')}`);
+                </script>
+                """, height=0)
+            st.success("文字已複製到剪貼簿！")
     else:
         st.error("文件不存在，請確保路徑和文件名正確。")
 
