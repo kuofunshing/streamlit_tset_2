@@ -198,9 +198,10 @@ def display_image_and_text(animal):
                     document.execCommand('copy');
                     document.body.removeChild(el);
                 }
-                copyToClipboard("{text}");
+                copyToClipboard(text);
                 </script>
-            """.format(text=text_content.replace('\n', '\\n').replace('"', '\\"'))
+                <input type="hidden" id="textToCopy" value="{text}">
+            """.format(text=text_content.replace("\n", "\\n").replace('"', '\\"'))
             st.components.v1.html(copy_to_clipboard_script, height=0)
             st.success("文字已複製到剪貼簿！")
     else:
@@ -213,6 +214,7 @@ def display_image_and_text(animal):
         st.image(image, caption='上傳的圖片', use_column_width=True)
     else:
         st.write("請上傳一個圖片文件。")
+
 
 # 充值頁面
 def recharge_page():
