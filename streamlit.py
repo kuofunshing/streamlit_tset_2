@@ -198,7 +198,7 @@ def display_image_and_text(animal):
                     document.execCommand('copy');
                     document.body.removeChild(el);
                 }}
-                copyToClipboard(`{text_content.replace('\n', '\\n').replace('"', '\\"')}`);
+                copyToClipboard(`{text_content.replace('\n', '\\n').replace('\"', '\\\"')}`);
                 </script>
                 """, height=0)
             st.success("文字已複製到剪貼簿！")
