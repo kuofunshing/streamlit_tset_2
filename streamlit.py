@@ -305,6 +305,11 @@ def gpt_page():
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
 
+        # 將 txt 內容複製到使用者輸入中
+        with open(f'label/{animal}.txt', 'r') as file:
+            txt_content = file.read()
+        st.session_state['chat_history'].append({"role": "user", "content": txt_content})
+
     # 顯示聊天歷史記錄
     for message in st.session_state['chat_history']:
         role = "你" if message["role"] == "user" else "ChatGPT"
