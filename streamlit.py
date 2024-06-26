@@ -184,23 +184,6 @@ def display_image_and_text(animal):
         with open(text_path, 'r') as file:
             text_content = file.read()
         st.write(text_content)
-        
-        # 添加複製到剪貼簿按鈕
-        if st.button("複製文字到剪貼簿"):
-            st.components.v1.html(f"""
-                <script>
-                function copyToClipboard(text) {{
-                    const el = document.createElement('textarea');
-                    el.value = text;
-                    document.body.appendChild(el);
-                    el.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(el);
-                }}
-                copyToClipboard(`{text_content.replace('\n', '\\n').replace('"', '\\"')}`);
-                </script>
-                """, height=0)
-            st.success("文字已複製到剪貼簿！")
     else:
         st.error("文件不存在，請確保路徑和文件名正確。")
 
@@ -212,6 +195,7 @@ def display_image_and_text(animal):
     else:
         st.write("請上傳一個圖片文件。")
 
+# 充值頁面
 def recharge_page():
     st.header("充值頁面")
     st.write("這是充值頁面。")
@@ -320,11 +304,6 @@ def gpt_page():
             st.session_state['chat_history'].append({"role": "assistant", "content": assistant_message})
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
-
-        # 將 txt 內容複製到使用者輸入中
-        with open(f'label/{animal}.txt', 'r') as file:
-            txt_content = file.read()
-        st.session_state['chat_history'].append({"role": "user", "content": txt_content})
 
     # 顯示聊天歷史記錄
     for message in st.session_state['chat_history']:
