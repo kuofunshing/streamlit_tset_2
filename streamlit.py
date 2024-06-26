@@ -270,14 +270,15 @@ def yt_page():
         st.session_state['last_played_video'] = None
 
     if st.button("播放選定影片"):
-        if not st.session_state['has_played'] or st.session_state['last_played_video'] != selected_video:
-            st.session_state['remaining_uses'] -= 1
-            st.session_state['has_played'] = True
-            st.session_state['last_played_video'] = selected_video
-            st.success("播放次數扣除")
-        else:
-            st.success("已播放過此影片，不再扣次")
-        
+        st.session_state['last_played_video'] = selected_video
+        st.session_state['has_played'] = True
+        st.session_state['remaining_uses'] -= 1
+        st.success("播放次數扣除")
+
+    # 顯示影片
+    if st.session_state['has_played'] and st.session_state['last_played_video'] == selected_video:
+        st.video(video_options[selected_video])
+
 
 # GPT頁面
 def gpt_page():
